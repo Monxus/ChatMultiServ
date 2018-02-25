@@ -44,16 +44,14 @@ public class GUI extends JFrame implements ActionListener {
     private JLabel labelServerC;
 
     private JButton butStartMyServer;
-    //private JButton butStopMyServer;
     private JButton butStartServerB;
-    // private JButton stopServerB;
     private JButton butStartServerC;
-    //private JButton stopServerC;
 
     private JTextArea serverConsole;
     private JTextArea clientConsole;
     private Estadisticas stadistics;
 
+    /* CONSTRUCTOR ---------------------------------------------------------- */
     public GUI(ChatServer cs) {
         this.cs = cs;
         this.crearVentana();
@@ -64,12 +62,52 @@ public class GUI extends JFrame implements ActionListener {
         return stadistics;
     }
 
-
     /* METODOS PUBLICOS ----------------------------------------------------- */
+    // Configura el aspecto visual cuando se cierra un server
+    public void closeServer(String host, int port) {
+        boolean checkSameServer = this.checkEqualsServer(hostB.getText(), Integer.parseInt(portB.getText()), hostC, portC);
+        if (this.checkEqualsServer(host, port, this.hostB, this.portB)) {
+            boolean connectedAux = checkSameServer && this.labelServerB.getForeground() == Color.GREEN;
+            this.setServerTextfield(host, port, hostB, portB, labelServerB, butStartServerB, connectedAux);
+        } else if (this.checkEqualsServer(host, port, this.hostC, this.portC)) {
+            boolean connectedAux = checkSameServer && this.labelServerC.getForeground() == Color.GREEN;
+            this.setServerTextfield(host, port, hostC, portC, labelServerC, butStartServerC, connectedAux);
+        }
+    }
+
+    //Muestra el error por no poder conectarse a un servidor que ya está lleno
+    public void errorOverloadServer(String host, int port) {
+        JOptionPane.showMessageDialog(this, "El servidor al que intentas conectarte no admite más conexiones", "Error", JOptionPane.ERROR_MESSAGE);
+        this.closeServer(host, port);
+    }
+
+    //Muetra el error de tener el puerto ya en uso
+    public void errorPortInUse() {
+        this.showMsgServer("ERROR: Este puerto ya está siendo utilizado");
+        JOptionPane.showMessageDialog(this, "El puerto ya está en uso, por favor, elige uno diferente", "Error", JOptionPane.ERROR_MESSAGE);
+        this.myPort.setEditable(true);
+        this.butStartMyServer.setEnabled(true);
+    }
+
+    //Cuando un servidor se conecta lo añade a los textfields
+    public void serverConnected(String host, int port) {
+        if (this.checkEqualsServer(host, port, this.hostB, this.portB)) {
+            this.setServerTextfield(host, port, hostB, portB, labelServerB, butStartServerB, true);
+        } else if (this.checkEqualsServer(host, port, this.hostC, this.portC)) {
+            this.setServerTextfield(host, port, hostC, portC, labelServerC, butStartServerC, true);
+        } else if (this.butStartServerB.isEnabled()) {
+            this.setServerTextfield(host, port, hostB, portB, labelServerB, butStartServerB, true);
+        } else {
+            this.setServerTextfield(host, port, hostC, portC, labelServerC, butStartServerC, true);
+        }
+    }
+
+    //Muestra mensaje en consola cliente
     public void showMsgClient(String msg) {
         this.clientConsole.append(msg + "\n");
     }
 
+    //Muestra mensaje en consola servidor
     public void showMsgServer(String msg) {
         this.serverConsole.append(msg + "\n");
     }
@@ -202,8 +240,8 @@ public class GUI extends JFrame implements ActionListener {
             {"Servidores conectados a este servidor", "0"}, {"Servidores totales del chat", "0"},
             {"Clientes conectados a este servidor", "0"}, {"Clientes totales del chat", "0"},
             {"Mensajes de clientes en este servidor", "0"}, {"Mensajes totales de clientes en el servidor", "0"},
-            {"Mensajes recibidos por servidores (mensajes chat)", "0"},{"Mensajes recibidos por servidores (estadisticas)", "0"},
-            {"Mensajes enviados a servidores (mensajes chat)", "0"},{"Mensajes enviados a servidores (estadisticas)", "0"}};
+            {"Mensajes recibidos por servidores (mensajes chat)", "0"}, {"Mensajes recibidos por servidores (estadisticas)", "0"},
+            {"Mensajes enviados a servidores (mensajes chat)", "0"}, {"Mensajes enviados a servidores (estadisticas)", "0"}};
 
         this.stadistics = new Estadisticas(dataRows, columnHeaders);
         this.stadistics.getColumnModel().getColumn(1).setMaxWidth(45);
@@ -222,6 +260,13 @@ public class GUI extends JFrame implements ActionListener {
         panel.add(this.addStadistics(), BorderLayout.EAST);
     }
 
+    //Comprueba si hay dos serviores iguales en los textfield
+    private boolean checkEqualsServer(String host, int port, JTextField tfHost, JTextField tfPort) {
+        String hostAux = tfHost.getText();
+        int portAux = (tfPort.getText().equals("")) ? -1 : Integer.parseInt(tfPort.getText());
+        return (host.equals(hostAux)) && port == portAux;
+    }
+
     //Crea la interfaz del server
     private void crearVentana() {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -234,78 +279,16 @@ public class GUI extends JFrame implements ActionListener {
         this.setVisible(true);
     }
 
-    private void startMyServer() {
-        this.butStartMyServer.setEnabled(false);
-        this.butStartServerB.setEnabled(true);
-        this.butStartServerC.setEnabled(true);
-        
-        this.portB.setEditable(true);
-        this.hostB.setEditable(true);
-        this.portC.setEditable(true);
-        this.hostC.setEditable(true);
-
-        this.myPort.setEditable(false);
-        this.labelMyServer.setForeground(Color.GREEN);
-
-        this.cs.startServer(Integer.parseInt(this.myPort.getText()));
+    //Muestra el error de tener el mismo servidor ya conectado
+    private void errorServerAlreadyConnected(JLabel lblServer, JTextField host, JTextField port, JButton butServer) {
+        JOptionPane.showMessageDialog(this, "Ya tienes una conexión abierta con este servidor", "Error", JOptionPane.ERROR_MESSAGE);
+        lblServer.setForeground(Color.red);
+        host.setEditable(true);
+        port.setEditable(true);
+        butServer.setEnabled(true);
     }
 
-    private void startServerB() {
-        this.butStartServerB.setEnabled(false);
-
-        this.portB.setEditable(false);
-        this.hostB.setEditable(false);
-
-        String hostAux = (this.hostB.getText().equals("localhost")) ? "127.0.0.1" : this.hostB.getText();
-        this.hostB.setText(hostAux);
-
-        
-        this.labelServerB.setForeground(Color.ORANGE);
-        
-        if (this.checkEqualsServer(hostB.getText(), Integer.parseInt(portB.getText()), hostC, portC)) {
-            this.errorServerAlreadyConnected(this.labelServerB,this.hostB,this.portB,this.butStartServerB);
-        }else{
-            this.cs.startOutServer(hostAux, Integer.parseInt(this.portB.getText()), Integer.parseInt(this.myPort.getText()));
-        }
-    }
-
-    private void startServerC() {
-        this.butStartServerC.setEnabled(false);
-
-        this.portC.setEditable(false);
-        this.hostC.setEditable(false);
-
-        String hostAux = (this.hostC.getText().equals("localhost")) ? "127.0.0.1" : this.hostC.getText();
-        this.hostC.setText(hostAux);
-
-        
-        this.labelServerC.setForeground(Color.ORANGE);
-        
-        if (this.checkEqualsServer(hostC.getText(), Integer.parseInt(portC.getText()), hostB, portB)) {
-            this.errorServerAlreadyConnected(this.labelServerC,this.hostC,this.portC,this.butStartServerC);
-        }else{
-            this.cs.startOutServer(hostAux, Integer.parseInt(this.portC.getText()), Integer.parseInt(this.myPort.getText()));
-        }
-    }
-
-    public void serverConnected(String host, int port) {
-        if (this.checkEqualsServer(host, port, this.hostB, this.portB)) {
-            this.setServerTextfield(host, port, hostB, portB, labelServerB, butStartServerB, true);
-        } else if (this.checkEqualsServer(host, port, this.hostC, this.portC)) {
-            this.setServerTextfield(host, port, hostC, portC, labelServerC, butStartServerC, true);
-        } else if (this.butStartServerB.isEnabled()) {
-            this.setServerTextfield(host, port, hostB, portB, labelServerB, butStartServerB, true);
-        } else {
-            this.setServerTextfield(host, port, hostC, portC, labelServerC, butStartServerC, true);
-        }
-    }
-
-    private boolean checkEqualsServer(String host, int port, JTextField tfHost, JTextField tfPort) {
-        String hostAux = tfHost.getText();
-        int portAux = (tfPort.getText().equals("")) ? -1 : Integer.parseInt(tfPort.getText());
-        return (host.equals(hostAux)) && port == portAux;
-    }
-
+    // Activa/Descativa los campos segúnel estado del servidor
     private void setServerTextfield(String host, int port, JTextField tfHost, JTextField tfPort, JLabel lblServer, JButton btnServer, boolean connected) {
         btnServer.setEnabled(!connected);
 
@@ -317,35 +300,59 @@ public class GUI extends JFrame implements ActionListener {
         lblServer.setForeground(fg);
     }
 
-    public void closeServer(String host, int port) {
-        boolean checkSameServer = this.checkEqualsServer(hostB.getText(), Integer.parseInt(portB.getText()), hostC, portC);
-        if (this.checkEqualsServer(host, port, this.hostB, this.portB)) {
-            boolean connectedAux = checkSameServer && this.labelServerB.getForeground()==Color.GREEN;
-            this.setServerTextfield(host, port, hostB, portB, labelServerB, butStartServerB, connectedAux);
-        } else if (this.checkEqualsServer(host, port, this.hostC, this.portC)) {
-            boolean connectedAux = checkSameServer && this.labelServerC.getForeground()==Color.GREEN;
-            this.setServerTextfield(host, port, hostC, portC, labelServerC, butStartServerC, connectedAux);
+    //Inicia mi servidor
+    private void startMyServer() {
+        this.butStartMyServer.setEnabled(false);
+        this.butStartServerB.setEnabled(true);
+        this.butStartServerC.setEnabled(true);
+
+        this.portB.setEditable(true);
+        this.hostB.setEditable(true);
+        this.portC.setEditable(true);
+        this.hostC.setEditable(true);
+
+        this.myPort.setEditable(false);
+        this.labelMyServer.setForeground(Color.GREEN);
+
+        this.cs.startServer(Integer.parseInt(this.myPort.getText()));
+    }
+
+    //Inicia el servidor B
+    private void startServerB() {
+        this.butStartServerB.setEnabled(false);
+
+        this.portB.setEditable(false);
+        this.hostB.setEditable(false);
+
+        String hostAux = (this.hostB.getText().equals("localhost")) ? "127.0.0.1" : this.hostB.getText();
+        this.hostB.setText(hostAux);
+
+        this.labelServerB.setForeground(Color.ORANGE);
+
+        if (this.checkEqualsServer(hostB.getText(), Integer.parseInt(portB.getText()), hostC, portC)) {
+            this.errorServerAlreadyConnected(this.labelServerB, this.hostB, this.portB, this.butStartServerB);
+        } else {
+            this.cs.startOutServer(hostAux, Integer.parseInt(this.portB.getText()), Integer.parseInt(this.myPort.getText()));
         }
     }
 
-    public void errorPortInUse() {
-        this.showMsgServer("ERROR: Este puerto ya está siendo utilizado");
-        JOptionPane.showMessageDialog(this, "El puerto ya está en uso, por favor, elige uno diferente", "Error", JOptionPane.ERROR_MESSAGE);
-        this.myPort.setEditable(true);
-        this.butStartMyServer.setEnabled(true);
-    }
-    
-    private void errorServerAlreadyConnected(JLabel lblServer, JTextField host, JTextField port, JButton butServer){
-        JOptionPane.showMessageDialog(this, "Ya tienes una conexión abierta con este servidor", "Error", JOptionPane.ERROR_MESSAGE);
-        lblServer.setForeground(Color.red);
-        host.setEditable(true);
-        port.setEditable(true);
-        butServer.setEnabled(true);
-    }
-    
-    void errorOverloadServer(String host, int port) {
-        JOptionPane.showMessageDialog(this, "El servidor al que intentas conectarte no admite más conexiones", "Error", JOptionPane.ERROR_MESSAGE);
-        this.closeServer(host,port);
+    //Inicia el servidor C
+    private void startServerC() {
+        this.butStartServerC.setEnabled(false);
+
+        this.portC.setEditable(false);
+        this.hostC.setEditable(false);
+
+        String hostAux = (this.hostC.getText().equals("localhost")) ? "127.0.0.1" : this.hostC.getText();
+        this.hostC.setText(hostAux);
+
+        this.labelServerC.setForeground(Color.ORANGE);
+
+        if (this.checkEqualsServer(hostC.getText(), Integer.parseInt(portC.getText()), hostB, portB)) {
+            this.errorServerAlreadyConnected(this.labelServerC, this.hostC, this.portC, this.butStartServerC);
+        } else {
+            this.cs.startOutServer(hostAux, Integer.parseInt(this.portC.getText()), Integer.parseInt(this.myPort.getText()));
+        }
     }
 
     /* LISTENER ------------------------------------------------------------- */
@@ -378,7 +385,5 @@ public class GUI extends JFrame implements ActionListener {
         }
 
     }
-
-    
 
 }

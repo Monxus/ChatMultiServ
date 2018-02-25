@@ -70,7 +70,7 @@ public class OutServer extends Thread {
 
     }
 
-    //Si consigue establecer contacto, le informa de que es un servidor
+    //Si consigue establecer contacto, le informa de que es un servidor y de su dirección
     private void sendInfo(BufferedReader in, PrintWriter out) {
         String line;
         try {
@@ -85,9 +85,9 @@ public class OutServer extends Thread {
                     if (this.chatServer.checkIfCouldAddServer(HOST, PORT)) {
                         this.chatServer.serverConnected(sock, HOST, PORT);
                     }
-                }else if (line.contains("er")) {
-                    this.chatServer.errorOverloadServer(HOST,PORT);
-                    tryConect=false;
+                } else if (line.contains("er")) {
+                    this.chatServer.errorOverloadServer(HOST, PORT);
+                    tryConect = false;
                 }
             }
 

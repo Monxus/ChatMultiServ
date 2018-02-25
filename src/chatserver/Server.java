@@ -15,7 +15,7 @@ import java.net.Socket;
  * @author Ramon
  */
 public class Server extends Cliente {
-    
+
     private final String HOST;
     private final int PORT;
 
@@ -25,7 +25,7 @@ public class Server extends Cliente {
         this.HOST = host;
         this.PORT = port;
     }
-    
+
     /* GETTERS Y SETTERS ---------------------------------------------------- */
     public String getHOST() {
         return HOST;
@@ -34,7 +34,12 @@ public class Server extends Cliente {
     public int getPORT() {
         return PORT;
     }
-    
+
+    /* METODOS PUBLICOS ----------------------------------------------------- */
+    //Comprara si el host y el port corresponden al servidor que entra.
+    public boolean compareServer(String host, int port) {
+        return ((this.PORT == port) && (this.HOST.equals(host)));
+    }
 
     /* METODOS PRIVADOS ----------------------------------------------------- */
     @Override
@@ -46,13 +51,13 @@ public class Server extends Cliente {
                 if ((line = in.readLine()) == null) {
                     done = true;
                 } else {
-                    this.chatServer.showMsgInServerConsole("Mensaje recibido de servidor: "+line);
+                    this.chatServer.showMsgInServerConsole("Mensaje recibido de servidor: " + line);
                     if (line.equals("bye")) {
                         done = true;
-                    } else if(line.startsWith("#")){
+                    } else if (line.startsWith("#")) {
                         this.chatServer.statsAddMsgServerStatsReceived();
-                        this.chatServer.updateStats(line.substring(1,line.length()),this);
-                    }else {
+                        this.chatServer.updateStats(line.substring(1, line.length()), this);
+                    } else {
                         this.chatServer.statsAddMsgServerReceived();
                         this.chatServer.doBroadcast(line, this);
                     }
@@ -65,9 +70,7 @@ public class Server extends Cliente {
         }
 
     }
+
     
-    public boolean compareServer(String host,int port){
-        return ((this.PORT == port) && (this.HOST.equals(host)));
-    }
 
 }

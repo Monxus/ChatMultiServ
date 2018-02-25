@@ -38,7 +38,7 @@ public class ServerMultithread extends Thread {
                 this.chatServer.showMsgInClientConsole("Waiting for a client...");
                 clientSock = serverSock.accept();
 
-                this.chatServer.showMsgInClientConsole("Client ("+ clientSock +") connected");
+                this.chatServer.showMsgInClientConsole("Client (" + clientSock + ") connected");
 
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(clientSock.getInputStream()));
@@ -48,7 +48,7 @@ public class ServerMultithread extends Thread {
             }
         } catch (IOException e) {
             System.out.println(e);
-            
+
             this.chatServer.errorPortInUse();
         }
     }
@@ -64,21 +64,21 @@ public class ServerMultithread extends Thread {
             } else {
 
                 if (line.contains("&")) {
-                    this.chatServer.showMsgInClientConsole("Mensaje recibido: "+line);
+                    this.chatServer.showMsgInClientConsole("Mensaje recibido: " + line);
                     this.chatServer.showMsgInClientConsole("Conectando cliente");
                     out.println("Connected");
-                    this.chatServer.addClient(this.clientSock,line.substring(1, line.length()));
+                    this.chatServer.addClient(this.clientSock, line.substring(1, line.length()));
                 } else if (line.contains("$")) {
-                    this.chatServer.showMsgInClientConsole("Mensaje recibido: "+line);
+                    this.chatServer.showMsgInClientConsole("Mensaje recibido: " + line);
                     String hostAux = this.clientSock.getInetAddress().getHostAddress();
                     int portAux = Integer.parseInt(line.substring(1, line.length()));
                     if (this.chatServer.checkIfCouldAddServer(hostAux, portAux)) {
                         out.println("ok");
-                        this.chatServer.showMsgInClientConsole("Conectando servidor "+hostAux+":"+portAux);                        
+                        this.chatServer.showMsgInClientConsole("Conectando servidor " + hostAux + ":" + portAux);
                         this.chatServer.serverConnected(this.clientSock, hostAux, portAux);
-                    }else{
+                    } else {
                         out.println("er");
-                        this.chatServer.showMsgInClientConsole("El servidor "+hostAux+":"+portAux+" no ha podido conectarse");
+                        this.chatServer.showMsgInClientConsole("El servidor " + hostAux + ":" + portAux + " no ha podido conectarse");
                     }
 
                 }

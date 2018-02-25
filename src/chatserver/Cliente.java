@@ -18,11 +18,10 @@ import java.util.logging.Logger;
  * @author Ramon
  */
 public class Cliente implements Runnable {
-
+    
     protected final Socket sock;
     protected BufferedReader in;
     protected PrintWriter out;
-    
     
     protected final ChatServer chatServer;
     private String name;
@@ -32,23 +31,22 @@ public class Cliente implements Runnable {
         this.sock = s;
         this.chatServer = cs;
     }
-    
+
     /* GETTERS Y SETTERS ---------------------------------------------------- */
     public void setName(String name) {
         this.name = name;
     }
-    
 
     /* METODOS PUBLICOS ----------------------------------------------------- */
     @Override
     public void run() {
         try {
-            this.in=new BufferedReader(new InputStreamReader(sock.getInputStream()));
+            this.in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             this.out = new PrintWriter(sock.getOutputStream(), true);
             takeMsg();
-            if (this.sock !=null) {
+            if (this.sock != null) {
                 this.sock.close();
-            }          
+            }            
         } catch (IOException ex) {
             Logger.getLogger(Cliente.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -56,11 +54,11 @@ public class Cliente implements Runnable {
 
     //Envia el mensaje al cliente
     public void sendMsg(String s) {
-        try{
-        out.println(s);
-        this.chatServer.showMsgInClientConsole("Mensaje enviado: "+s);
-        }catch(Exception e){
-            this.chatServer.showMsgInClientConsole("Error al enviar mensaje: "+s);
+        try {
+            out.println(s);
+            this.chatServer.showMsgInClientConsole("Mensaje enviado: " + s);
+        } catch (Exception e) {
+            this.chatServer.showMsgInClientConsole("Error al enviar mensaje: " + s);
             this.chatServer.showMsgInClientConsole("Reintentando enviar");
             try {
                 Thread.sleep(1000);
@@ -70,7 +68,7 @@ public class Cliente implements Runnable {
             this.sendMsg(s);
         }
     }
-    
+
     /* METODOS PRIVADOS ----------------------------------------------------- */
     //Coge el mensaje del cliente y lo distribuye entre los clientes y el otro servidor
     protected void takeMsg() {
@@ -92,9 +90,8 @@ public class Cliente implements Runnable {
         } catch (IOException e) {
             System.out.println(e);
         } finally {
-            this.chatServer.deleteClient(this,this.name);
+            this.chatServer.deleteClient(this, this.name);
         }
     }
-
-
+    
 }

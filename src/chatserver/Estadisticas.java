@@ -26,6 +26,7 @@ public class Estadisticas extends JTable {
     private int receiveServerStatsMsg;
     private int sendServerStatsMsg;
 
+    /* CONSTRUCTOR ---------------------------------------------------------- */
     public Estadisticas(Object[][] rowData, Object[] columnNames) {
         super(rowData, columnNames);
         this.serversConnected = 0;
@@ -40,6 +41,7 @@ public class Estadisticas extends JTable {
         this.sendServerStatsMsg = 0;
     }
 
+    /* GETTERS Y SETTERS ---------------------------------------------------- */
     public int getClientsConnected() {
         return clientsConnected;
     }
@@ -52,6 +54,8 @@ public class Estadisticas extends JTable {
         return totalServersConnected;
     }
 
+    /* METODOS PUBLICOS ----------------------------------------------------- */
+    //Añade un cliente a las estadisticas
     public void addClient() {
         this.clientsConnected++;
         TableModel tAux = this.getModel();
@@ -60,6 +64,7 @@ public class Estadisticas extends JTable {
         this.syncTotalClients(this.totalClientsConnected);
     }
 
+    //Añade un servidor a las estadísticas
     public void addServer() {
         this.serversConnected++;
         TableModel tAux = this.getModel();
@@ -68,22 +73,7 @@ public class Estadisticas extends JTable {
         this.syncTotalServers(this.totalServersConnected);
     }
 
-    public void deleteClient() {
-        this.clientsConnected--;
-        TableModel tAux = this.getModel();
-        tAux.setValueAt(this.clientsConnected, 2, 1);
-        this.totalClientsConnected--;
-        this.syncTotalClients(this.totalClientsConnected);
-    }
-    
-    public void deleteServer() {
-        this.serversConnected--;
-        TableModel tAux = this.getModel();
-        tAux.setValueAt(this.clientsConnected, 0, 1);
-        this.totalServersConnected--;
-        this.syncTotalServers(this.totalServersConnected);
-    }
-
+    //Añade mensajes recibidos por clientes
     public void addMsgClientReceived() {
         this.clientsMsg++;
         TableModel tAux = this.getModel();
@@ -91,6 +81,7 @@ public class Estadisticas extends JTable {
         this.addTotalMsg();
     }
 
+    //Añade mensajes recibidos por servidor
     public void addMsgServerReceived() {
         this.receiveServerMsg++;
         TableModel tAux = this.getModel();
@@ -98,39 +89,65 @@ public class Estadisticas extends JTable {
         this.addTotalMsg();
     }
 
+    //Añade mensajes enviados a servidor con estadisticas
     public void addMsgServerStatsSent() {
         this.sendServerStatsMsg++;
         TableModel tAux = this.getModel();
         tAux.setValueAt(this.sendServerStatsMsg, 9, 1);
     }
 
+    //Añade mensajes enviados a servidor
     public void addMsgServerSent() {
         this.sendServerMsg++;
         TableModel tAux = this.getModel();
         tAux.setValueAt(this.sendServerMsg, 8, 1);
     }
 
+    //Añade mensajes recibidos con estadísticas
     public void addMsgServerStatsReceived() {
         this.receiveServerStatsMsg++;
         TableModel tAux = this.getModel();
         tAux.setValueAt(this.receiveServerStatsMsg, 7, 1);
     }
-
-    private void addTotalMsg(){
-        this.totalClientsMsg=this.clientsMsg+this.receiveServerMsg;
+    
+    //Elimina un cliente de las estadisticas
+    public void deleteClient() {
+        this.clientsConnected--;
         TableModel tAux = this.getModel();
-        tAux.setValueAt(this.totalClientsMsg, 5, 1);
+        tAux.setValueAt(this.clientsConnected, 2, 1);
+        this.totalClientsConnected--;
+        this.syncTotalClients(this.totalClientsConnected);
     }
 
+    //Elimina un server de las estadísticas
+    public void deleteServer() {
+        this.serversConnected--;
+        TableModel tAux = this.getModel();
+        tAux.setValueAt(this.serversConnected, 0, 1);
+        this.totalServersConnected--;
+        this.syncTotalServers(this.totalServersConnected);
+    }
+    
+    //Sincroniza el total de clientes al unir servidores
     public void syncTotalClients(int totalClients) {
-        this.totalClientsConnected=totalClients;
+        this.totalClientsConnected = totalClients;
         TableModel tAux = this.getModel();
         tAux.setValueAt(this.totalClientsConnected, 3, 1);
     }
 
-    public void syncTotalServers(int totalServers){
-        this.totalServersConnected=totalServers;
+    //Sncroniza el total de servidores al unir servidores
+    public void syncTotalServers(int totalServers) {
+        this.totalServersConnected = totalServers;
         TableModel tAux = this.getModel();
         tAux.setValueAt(this.totalServersConnected, 1, 1);
     }
+    
+    /* METODOS PRIVADOS ----------------------------------------------------- */
+    //Añade mensajes al total
+    private void addTotalMsg() {
+        this.totalClientsMsg = this.clientsMsg + this.receiveServerMsg;
+        TableModel tAux = this.getModel();
+        tAux.setValueAt(this.totalClientsMsg, 5, 1);
+    }
+
 }
